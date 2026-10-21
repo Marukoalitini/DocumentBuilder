@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
+    <PackageId>DocumentBuilder</PackageId>
+    <Version>1.0.0-preview</Version>
+    <Authors>Marco Alija Ramos Agostini, Edmund Soares de Sousa, Richard Mickaell Santos Nascimento</Authors>
+    <Description>An extensible document generation and export library in C#.</Description>
+  </PropertyGroup>
+
+</Project>

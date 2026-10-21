@@ -1,0 +1,29 @@
+## .NET Core
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+
+## Visual Studio / Rider cache & user files
+.vs/
+.idea/
+*.user
+*.userosscache
+*.suo
+*.userprefs
+*.ide/
+*.swp
+*~
+
+## Build results
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+build/
+*.nuget.props
+*.nuget.targets
+
+## Test results
+TestResults/
+[Tt]est[Rr]esult*/
