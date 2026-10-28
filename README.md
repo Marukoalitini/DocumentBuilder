@@ -8,19 +8,11 @@ O projeto foi desenvolvido com foco em boas práticas de orientação a objetos,
 
 ## Integrantes e Divisão de Padrões
 
-| Aluno | Padrões de Projeto Designados | Escopo de Apresentação |
+| Aluno | Padrões de Projeto | Apresentação |
 | :--- | :--- | :--- |
 | **Marco Alija Ramos Agostini** | Composite & Builder | Entrega Parcial (29/10) |
 | **Edmund Soares de Sousa** | Strategy & Decorator | Entrega Final (12/11) |
 | **Richard Mickaell Santos Nascimento** | Template Method & Observer | Entrega Final (12/11) |
-
----
-
-## Apresentação em Vídeo
-
-- **Link no YouTube:** https://youtu.be/SEU_LINK_AQUI
-
----
 
 ## Arquitetura e Design Patterns
 
