@@ -1,3 +1,4 @@
+using DocumentBuilder.Decorators;
 using DocumentBuilder.Elements;
 
 namespace DocumentBuilder.Builders;
@@ -76,6 +77,41 @@ public sealed class DocumentBuilder
     public DocumentBuilder AddParagraph(string text)
     {
         _document.Add(new Paragraph(text));
+        return this;
+    }
+
+    /// <summary>
+    /// Adds a bold-decorated paragraph of text to the root document.
+    /// </summary>
+    /// <param name="text">The paragraph text.</param>
+    /// <returns>The current builder instance for chaining.</returns>
+    public DocumentBuilder AddBoldParagraph(string text)
+    {
+        _document.Add(new Paragraph(text).AsBold());
+        return this;
+    }
+
+    /// <summary>
+    /// Adds an italic-decorated paragraph of text to the root document.
+    /// </summary>
+    /// <param name="text">The paragraph text.</param>
+    /// <returns>The current builder instance for chaining.</returns>
+    public DocumentBuilder AddItalicParagraph(string text)
+    {
+        _document.Add(new Paragraph(text).AsItalic());
+        return this;
+    }
+
+    /// <summary>
+    /// Adds a paragraph wrapped inside a framed border to the root document.
+    /// </summary>
+    /// <param name="text">The paragraph text.</param>
+    /// <param name="label">Optional header label for the border box.</param>
+    /// <param name="borderCharacter">The character used to draw the border. Defaults to '='.</param>
+    /// <returns>The current builder instance for chaining.</returns>
+    public DocumentBuilder AddBorderedParagraph(string text, string? label = null, char borderCharacter = '=')
+    {
+        _document.Add(new Paragraph(text).WithBorder(label, borderCharacter));
         return this;
     }
 

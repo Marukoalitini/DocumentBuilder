@@ -1,3 +1,4 @@
+using DocumentBuilder.Decorators;
 using DocumentBuilder.Elements;
 
 namespace DocumentBuilder.Builders;
@@ -41,6 +42,41 @@ public sealed class SectionBuilder
     public SectionBuilder AddParagraph(string text)
     {
         _section.Add(new Paragraph(text));
+        return this;
+    }
+
+    /// <summary>
+    /// Adds a bold-decorated paragraph of text to the section.
+    /// </summary>
+    /// <param name="text">The paragraph text.</param>
+    /// <returns>The current section builder for chaining.</returns>
+    public SectionBuilder AddBoldParagraph(string text)
+    {
+        _section.Add(new Paragraph(text).AsBold());
+        return this;
+    }
+
+    /// <summary>
+    /// Adds an italic-decorated paragraph of text to the section.
+    /// </summary>
+    /// <param name="text">The paragraph text.</param>
+    /// <returns>The current section builder for chaining.</returns>
+    public SectionBuilder AddItalicParagraph(string text)
+    {
+        _section.Add(new Paragraph(text).AsItalic());
+        return this;
+    }
+
+    /// <summary>
+    /// Adds a paragraph wrapped inside a framed border to the section.
+    /// </summary>
+    /// <param name="text">The paragraph text.</param>
+    /// <param name="label">Optional header label for the border box.</param>
+    /// <param name="borderCharacter">The character used to draw the border. Defaults to '='.</param>
+    /// <returns>The current section builder for chaining.</returns>
+    public SectionBuilder AddBorderedParagraph(string text, string? label = null, char borderCharacter = '=')
+    {
+        _section.Add(new Paragraph(text).WithBorder(label, borderCharacter));
         return this;
     }
 
