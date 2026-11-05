@@ -1,15 +1,19 @@
+using DocumentBuilder.Decorators;
+using DocumentBuilder.Demo.Extensions;
 using DocumentBuilder.Elements;
 using DocumentBuilder.Exporters;
 using DocBuilder = DocumentBuilder.Builders.DocumentBuilder;
 
 Console.ForegroundColor = ConsoleColor.Cyan;
-Console.WriteLine("==========================================================");
-Console.WriteLine("   DocumentBuilder - Sample Client Demonstration (.NET 10)");
-Console.WriteLine("==========================================================");
+Console.WriteLine("================================================================");
+Console.WriteLine("   DocumentBuilder - Complete Architecture Demonstration (.NET 10)");
+Console.WriteLine("================================================================");
 Console.ResetColor();
 
-// Construct a real-world enterprise infrastructure audit report
-Console.WriteLine("\n[1] Constructing document using DocumentBuilder fluent API...");
+// ---------------------------------------------------------------------------
+// PART 1: Building a complex document using Composite, Builder, and Decorator
+// ---------------------------------------------------------------------------
+Console.WriteLine("\n[1] Constructing document using Composite, Builder, and Decorator patterns...");
 
 Document document = new DocBuilder("Global Cloud Infrastructure & Systems Audit")
     .WithAuthor("Enterprise Operations Group")
@@ -23,6 +27,7 @@ Document document = new DocBuilder("Global Cloud Infrastructure & Systems Audit"
                   "Objective (SLO) of 99.95%. This audit report presents a consolidated breakdown " +
                   "of compute cluster utilization, data layer performance, and security posture " +
                   "across all active regional zones.")
+    .AddBoldParagraph("Key Finding: All regional production clusters met high-availability targets without service interruption.")
     .AddImage("https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=800",
               caption: "Figure 1.1: Multi-Region Compute Cluster Workload Distribution",
               altText: "Cluster Workload Distribution")
@@ -41,12 +46,13 @@ Document document = new DocBuilder("Global Cloud Infrastructure & Systems Audit"
         .AddSubSection("Cluster Storage & IOPS Metrics", sub => sub
             .AddParagraph("Average persistent volume latency was measured at 0.72 milliseconds, " +
                           "with zero unrecoverable volume degradation events recorded.")
+            .AddItalicParagraph("Note: IOPS measurements were collected under peak load conditions.")
         )
     )
     .AddSection("Compliance and Security Posture", section => section
-        .AddParagraph("All cluster worker nodes have received the latest security kernel patches " +
-                      "with zero unresolved high-severity Common Vulnerabilities and Exposures (CVEs). " +
-                      "Strict mutual TLS 1.3 encryption is enforced across all internal microservice endpoints.")
+        .AddBorderedParagraph(
+            "All cluster worker nodes have received the latest security kernel patches with zero unresolved critical CVEs.",
+            label: "Security Clearance")
         .AddParagraph("Key audit highlights:")
         .AddBulletList([
             "Automated vulnerability scanning enabled on all CI/CD pipelines.",
@@ -60,30 +66,61 @@ Document document = new DocBuilder("Global Cloud Infrastructure & Systems Audit"
             "Enable HTTP/3 protocol negotiation on primary ingress controllers.",
             "Execute annual disaster recovery simulation by mid-November 2026."
         ])
-        .AddParagraph("The next recurring quarterly review is scheduled for December 15, 2026.")
     )
+    // Injecting a custom element defined in the client project (Open/Closed Principle)
+    .AddElement(new CalloutBox("Notice", "Next recurring quarterly audit is scheduled for December 15, 2026.").WithBorder("Schedule"))
     .Build();
 
 Console.ForegroundColor = ConsoleColor.Green;
-Console.WriteLine("✓ Document constructed successfully in memory!");
+Console.WriteLine("✓ Document constructed in memory!");
 Console.ResetColor();
 
-// Export the document using the out-of-the-box MarkdownDocumentExporter
-Console.WriteLine("\n[2] Exporting document using MarkdownDocumentExporter...");
-
-IDocumentExporter exporter = new MarkdownDocumentExporter();
-string renderedContent = exporter.Export(document);
-
-Console.WriteLine("\n--- Rendered Markdown (.md) Output ---");
-Console.WriteLine(renderedContent);
-
-// Save to an output file
 string outputDirectory = Path.Combine(AppContext.BaseDirectory, "output");
-string outputPath = Path.Combine(outputDirectory, "cloud_infrastructure_audit.md");
+var progressObserver = new ConsoleExportObserver();
 
-exporter.ExportToFile(document, outputPath);
+// ---------------------------------------------------------------------------
+// PART 2: Standard Out-of-the-Box Export (Strategy + Template Method + Observer)
+// ---------------------------------------------------------------------------
+Console.WriteLine("\n[2] Exporting with default MarkdownDocumentExporter (Strategy #1)...");
+
+var markdownExporter = new MarkdownDocumentExporter();
+markdownExporter.Attach(progressObserver);
+
+var exportContext = new DocumentExportContext(markdownExporter);
+string markdownPath = Path.Combine(outputDirectory, "cloud_infrastructure_audit.md");
+exportContext.ExportToFile(document, markdownPath);
 
 Console.ForegroundColor = ConsoleColor.Green;
-Console.WriteLine($"\n✓ Document exported to file successfully: {outputPath}");
+Console.WriteLine($"✓ Markdown exported to: {markdownPath}");
 Console.ResetColor();
-Console.WriteLine("\nDemonstration completed successfully.");
+
+Console.WriteLine("\n[3] Switching strategy at runtime to HtmlDocumentExporter (Strategy #2)...");
+
+var htmlExporter = new HtmlDocumentExporter();
+htmlExporter.Attach(progressObserver);
+
+exportContext.SetStrategy(htmlExporter);
+string htmlPath = Path.Combine(outputDirectory, "cloud_infrastructure_audit.html");
+exportContext.ExportToFile(document, htmlPath);
+
+Console.ForegroundColor = ConsoleColor.Green;
+Console.WriteLine($"✓ HTML exported to: {htmlPath}");
+Console.ResetColor();
+
+// ---------------------------------------------------------------------------
+// PART 3: Client Extensibility (Open/Closed Principle - Custom Exporter)
+// ---------------------------------------------------------------------------
+Console.WriteLine("\n[4] Switching strategy to custom client PlainTextDocumentExporter (OCP Extension)...");
+
+var customTxtExporter = new PlainTextDocumentExporter();
+customTxtExporter.Attach(progressObserver);
+
+exportContext.SetStrategy(customTxtExporter);
+string txtPath = Path.Combine(outputDirectory, "cloud_infrastructure_audit.txt");
+exportContext.ExportToFile(document, txtPath);
+
+Console.ForegroundColor = ConsoleColor.Green;
+Console.WriteLine($"✓ Custom Plain Text exported to: {txtPath}");
+Console.ResetColor();
+
+Console.WriteLine("\nAll demonstrations completed successfully.");
