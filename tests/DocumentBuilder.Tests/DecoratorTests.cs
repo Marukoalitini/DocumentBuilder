@@ -1,11 +1,21 @@
 using DocumentBuilder.Decorators;
 using DocumentBuilder.Elements;
+using DocumentBuilder.Exporters;
 using DocBuilder = DocumentBuilder.Builders.DocumentBuilder;
 
 namespace DocumentBuilder.Tests;
 
 public class DecoratorTests
 {
+    private sealed class CustomHighlightDecorator(IDocumentElement innerElement)
+        : DocumentElementDecorator(innerElement)
+    {
+        public override string FormatDecoratedContent(string innerContent, int indentationLevel = 0)
+        {
+            string indent = new(' ', Math.Max(0, indentationLevel) * 2);
+            return $"{indent}=={innerContent}==";
+        }
+    }
     [Fact]
     public void BoldDecorator_ShouldWrapElementContentInDoubleAsterisks()
     {
@@ -76,5 +86,22 @@ public class DecoratorTests
         Assert.IsType<BoldDecorator>(doc.Elements[0]);
         Assert.IsType<ItalicDecorator>(doc.Elements[1]);
         Assert.IsType<BorderDecorator>(doc.Elements[2]);
+    }
+
+    [Fact]
+    public void CustomUserDecorator_ShouldIntegrateWithExportersRecursively()
+    {
+        // Arrange
+        Document doc = new DocBuilder("Custom Decorator Test")
+            .AddElement(new CustomHighlightDecorator(new Paragraph("Highlighted text").AsBold()))
+            .Build();
+
+        var htmlExporter = new HtmlDocumentExporter();
+
+        // Act
+        string htmlOutput = htmlExporter.Export(doc);
+
+        // Assert
+        Assert.Contains("==<p><strong>Highlighted text</strong></p>==", htmlOutput);
     }
 }

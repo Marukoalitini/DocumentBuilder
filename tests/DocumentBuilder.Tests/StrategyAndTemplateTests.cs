@@ -32,8 +32,8 @@ public class StrategyAndTemplateTests
         Assert.Contains("<h1>System Report</h1>", html);
         Assert.Contains("<strong>Author:</strong> Ops Team", html);
         Assert.Contains("<h2>Section Heading</h2>", html);
-        Assert.Contains("<strong><p>Bold statement</p></strong>", html);
-        Assert.Contains("<em><p>Italic note</p></em>", html);
+        Assert.Contains("<p><strong>Bold statement</strong></p>", html);
+        Assert.Contains("<p><em>Italic note</em></p>", html);
         Assert.Contains("class=\"bordered-box\"", html);
         Assert.Contains("<th>Host</th>", html);
         Assert.Contains("<td>srv-01</td>", html);

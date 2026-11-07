@@ -162,12 +162,20 @@ public sealed class HtmlDocumentExporter : DocumentExporterTemplate
     /// <inheritdoc />
     protected override string FormatBold(BoldDecorator bold, string innerContent, int currentHeadingLevel)
     {
+        if (innerContent.StartsWith("<p>", StringComparison.Ordinal) && innerContent.EndsWith("</p>", StringComparison.Ordinal))
+        {
+            return $"  <p><strong>{innerContent[3..^4]}</strong></p>";
+        }
         return $"  <strong>{innerContent}</strong>";
     }
 
     /// <inheritdoc />
     protected override string FormatItalic(ItalicDecorator italic, string innerContent, int currentHeadingLevel)
     {
+        if (innerContent.StartsWith("<p>", StringComparison.Ordinal) && innerContent.EndsWith("</p>", StringComparison.Ordinal))
+        {
+            return $"  <p><em>{innerContent[3..^4]}</em></p>";
+        }
         return $"  <em>{innerContent}</em>";
     }
 

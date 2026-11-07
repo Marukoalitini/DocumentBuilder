@@ -1,4 +1,5 @@
 using System.Text;
+using DocumentBuilder.Decorators;
 using DocumentBuilder.Elements;
 using DocumentBuilder.Exporters;
 
@@ -79,6 +80,18 @@ public sealed class PlainTextDocumentExporter : DocumentExporterTemplate
     protected override string FormatHorizontalSeparator(HorizontalSeparator separator, int currentHeadingLevel)
     {
         return separator.Render(Math.Max(0, currentHeadingLevel - 2));
+    }
+
+    protected override string FormatBold(BoldDecorator bold, string innerContent, int currentHeadingLevel)
+    {
+        string indent = new(' ', Math.Max(0, currentHeadingLevel - 2) * 2);
+        return $"{indent}[BOLD] {innerContent}";
+    }
+
+    protected override string FormatItalic(ItalicDecorator italic, string innerContent, int currentHeadingLevel)
+    {
+        string indent = new(' ', Math.Max(0, currentHeadingLevel - 2) * 2);
+        return $"{indent}[ITALIC] {innerContent}";
     }
 
     protected override string FormatFooter(Document document)

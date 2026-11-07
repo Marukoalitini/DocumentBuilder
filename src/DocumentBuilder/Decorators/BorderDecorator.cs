@@ -33,11 +33,10 @@ public sealed class BorderDecorator : DocumentElementDecorator
     }
 
     /// <inheritdoc />
-    public override string Render(int indentationLevel = 0)
+    public override string FormatDecoratedContent(string innerContent, int indentationLevel = 0)
     {
         string indent = new(' ', Math.Max(0, indentationLevel) * 2);
-        string innerRendered = InnerElement.Render(0);
-        string[] lines = innerRendered.Split('\n').Select(l => l.TrimEnd('\r')).ToArray();
+        string[] lines = innerContent.Split('\n').Select(l => l.TrimEnd('\r')).ToArray();
 
         int maxLineLength = lines.Length > 0 ? lines.Max(l => l.Length) : 20;
         if (!string.IsNullOrWhiteSpace(Label))

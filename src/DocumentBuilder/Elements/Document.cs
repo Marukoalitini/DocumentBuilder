@@ -6,9 +6,8 @@ namespace DocumentBuilder.Elements;
 /// Represents the root composite element of a document hierarchy.
 /// Contains document metadata and a collection of child document elements.
 /// </summary>
-public sealed class Document : IDocumentElement
+public sealed class Document : CompositeElement
 {
-    private readonly List<IDocumentElement> _elements = [];
     private readonly Dictionary<string, string> _metadata = new(StringComparer.OrdinalIgnoreCase);
 
     /// <summary>
@@ -30,11 +29,6 @@ public sealed class Document : IDocumentElement
     /// Gets a read-only dictionary of the document metadata.
     /// </summary>
     public IReadOnlyDictionary<string, string> Metadata => _metadata.AsReadOnly();
-
-    /// <summary>
-    /// Gets a read-only list of all child elements in the document.
-    /// </summary>
-    public IReadOnlyList<IDocumentElement> Elements => _elements.AsReadOnly();
 
     /// <summary>
     /// Initializes a new instance of the <see cref="Document"/> class.
@@ -72,27 +66,8 @@ public sealed class Document : IDocumentElement
     /// <exception cref="ArgumentNullException">Thrown when <paramref name="element"/> is null.</exception>
     public Document Add(IDocumentElement element)
     {
-        ArgumentNullException.ThrowIfNull(element);
-        _elements.Add(element);
+        AddChild(element);
         return this;
-    }
-
-    /// <summary>
-    /// Removes a child element from the document root.
-    /// </summary>
-    /// <param name="element">The document element to remove.</param>
-    /// <returns><c>true</c> if the element was removed; otherwise, <c>false</c>.</returns>
-    public bool Remove(IDocumentElement element)
-    {
-        return _elements.Remove(element);
-    }
-
-    /// <summary>
-    /// Clears all elements from the document.
-    /// </summary>
-    public void Clear()
-    {
-        _elements.Clear();
     }
 
     /// <summary>
@@ -100,7 +75,7 @@ public sealed class Document : IDocumentElement
     /// </summary>
     /// <param name="indentationLevel">The zero-based indentation level.</param>
     /// <returns>A formatted string of the entire document.</returns>
-    public string Render(int indentationLevel = 0)
+    public override string Render(int indentationLevel = 0)
     {
         var sb = new StringBuilder();
 
@@ -120,7 +95,7 @@ public sealed class Document : IDocumentElement
 
         sb.AppendLine();
 
-        foreach (IDocumentElement element in _elements)
+        foreach (IDocumentElement element in Elements)
         {
             sb.AppendLine(element.Render(indentationLevel));
             sb.AppendLine();
@@ -128,7 +103,4 @@ public sealed class Document : IDocumentElement
 
         return sb.ToString().TrimEnd();
     }
-
-    /// <inheritdoc />
-    public override string ToString() => Render();
 }

@@ -154,6 +154,7 @@ public abstract class DocumentExporterTemplate : IDocumentExporter
             BoldDecorator bold => FormatBold(bold, FormatElement(bold.InnerElement, currentHeadingLevel).Trim(), currentHeadingLevel),
             ItalicDecorator italic => FormatItalic(italic, FormatElement(italic.InnerElement, currentHeadingLevel).Trim(), currentHeadingLevel),
             BorderDecorator border => FormatBorder(border, FormatElement(border.InnerElement, currentHeadingLevel).Trim(), currentHeadingLevel),
+            DocumentElementDecorator customDecorator => FormatCustomDecorator(customDecorator, FormatElement(customDecorator.InnerElement, currentHeadingLevel).Trim(), currentHeadingLevel),
             _ => FormatCustomElement(element, currentHeadingLevel)
         };
     }
@@ -251,7 +252,16 @@ public abstract class DocumentExporterTemplate : IDocumentExporter
     /// </summary>
     protected virtual string FormatBorder(BorderDecorator border, string innerContent, int currentHeadingLevel)
     {
-        return border.Render(Math.Max(0, currentHeadingLevel - 2));
+        return border.FormatDecoratedContent(innerContent, Math.Max(0, currentHeadingLevel - 2));
+    }
+
+    /// <summary>
+    /// Hook method for formatting custom user-defined <see cref="DocumentElementDecorator"/> implementations.
+    /// Recursively formats the inner element using the active exporter before applying the custom decoration.
+    /// </summary>
+    protected virtual string FormatCustomDecorator(DocumentElementDecorator decorator, string innerContent, int currentHeadingLevel)
+    {
+        return decorator.FormatDecoratedContent(innerContent, Math.Max(0, currentHeadingLevel - 2));
     }
 
     /// <summary>

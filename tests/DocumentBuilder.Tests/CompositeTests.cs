@@ -196,4 +196,22 @@ public class CompositeTests
         // Assert
         Assert.Equal("  ====================", rendered);
     }
+
+    [Fact]
+    public void CompositeElement_DocumentAndSection_SharePolymorphicContainerBehavior()
+    {
+        // Arrange
+        CompositeElement docContainer = new Document("Root");
+        CompositeElement sectionContainer = new Section("Sub");
+
+        // Act
+        ((Document)docContainer).Add(new Paragraph("A"));
+        ((Section)sectionContainer).Add(new Paragraph("B"));
+
+        // Assert
+        Assert.Single(docContainer.Elements);
+        Assert.Single(sectionContainer.Elements);
+        docContainer.Clear();
+        Assert.Empty(docContainer.Elements);
+    }
 }
