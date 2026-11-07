@@ -18,6 +18,12 @@ public abstract class DocumentExporterTemplate : IDocumentExporter
     public abstract string FileExtension { get; }
 
     /// <summary>
+    /// Gets the text encoding used when writing the exported output to a file.
+    /// Defaults to <see cref="Encoding.UTF8"/>.
+    /// </summary>
+    protected virtual Encoding OutputEncoding => Encoding.UTF8;
+
+    /// <summary>
     /// Occurs when the document export operation begins.
     /// </summary>
     public event EventHandler<ExportProgressEventArgs>? ExportStarted;
@@ -109,7 +115,8 @@ public abstract class DocumentExporterTemplate : IDocumentExporter
             sb.Append(footer);
         }
 
-        string finalOutput = sb.ToString().TrimEnd() + Environment.NewLine;
+        string aggregatedOutput = sb.ToString().TrimEnd() + Environment.NewLine;
+        string finalOutput = FinalizeExport(document, aggregatedOutput);
         NotifyExportCompleted(document, totalElements, finalOutput);
 
         return finalOutput;
@@ -121,7 +128,7 @@ public abstract class DocumentExporterTemplate : IDocumentExporter
         ArgumentNullException.ThrowIfNull(filePath);
         string content = Export(document);
         EnsureDirectoryExists(filePath);
-        File.WriteAllText(filePath, content, Encoding.UTF8);
+        File.WriteAllText(filePath, content, OutputEncoding);
     }
 
     /// <inheritdoc />
@@ -130,7 +137,7 @@ public abstract class DocumentExporterTemplate : IDocumentExporter
         ArgumentNullException.ThrowIfNull(filePath);
         string content = Export(document);
         EnsureDirectoryExists(filePath);
-        await File.WriteAllTextAsync(filePath, content, Encoding.UTF8, cancellationToken);
+        await File.WriteAllTextAsync(filePath, content, OutputEncoding, cancellationToken);
     }
 
     /// <summary>
@@ -372,6 +379,19 @@ public abstract class DocumentExporterTemplate : IDocumentExporter
     protected virtual string FormatFooter(Document document)
     {
         return string.Empty;
+    }
+
+    /// <summary>
+    /// Hook method invoked after all document sections have been formatted to perform final assembly
+    /// or binary/container packaging (such as building a PDF cross-reference table).
+    /// Returns <paramref name="aggregatedContent"/> unchanged by default.
+    /// </summary>
+    /// <param name="document">The document being exported.</param>
+    /// <param name="aggregatedContent">The aggregated content produced by the formatting steps.</param>
+    /// <returns>The finalized document output string.</returns>
+    protected virtual string FinalizeExport(Document document, string aggregatedContent)
+    {
+        return aggregatedContent;
     }
 
     private void NotifyExportStarted(Document document, int totalElements)

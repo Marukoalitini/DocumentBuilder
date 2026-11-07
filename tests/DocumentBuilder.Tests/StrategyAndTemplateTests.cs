@@ -106,4 +106,41 @@ public class StrategyAndTemplateTests
         Assert.Contains("text-align: center;", html);
         Assert.Contains("<mark style=\"background-color: #fef08a;", html);
     }
+
+    [Fact]
+    public void PdfDocumentExporter_Export_ProducesValidMultiPagePdf14Structure()
+    {
+        // Arrange
+        Document doc = new DocBuilder("PDF Audit Report", "Security Team")
+            .WithMetadata("Classification", "Confidential")
+            .AddTitle("Executive Overview", 1)
+            .AddBoldParagraph("All systems operational.")
+            .AddTable(["Service", "Latency"], [["Auth API", "4.2ms"]])
+            .AddCodeBlock("dotnet test --configuration Release", "bash")
+            .AddBlockquote("Reliability is our primary feature.", "VP of Engineering")
+            .AddPageBreak()
+            .AddSection("Second Page Section", s => s
+                .AddBulletList("Check A", "Check B")
+                .AddHorizontalSeparator()
+                .AddHyperlink("Status Page", "https://status.example.com")
+            )
+            .Build();
+
+        var pdfExporter = new PdfDocumentExporter();
+
+        // Act
+        string pdfContent = pdfExporter.Export(doc);
+
+        // Assert
+        Assert.Equal(".pdf", pdfExporter.FileExtension);
+        Assert.StartsWith("%PDF-1.4\n", pdfContent);
+        Assert.Contains("/Type /Catalog", pdfContent);
+        Assert.Contains("/Type /Pages /Kids [7 0 R 9 0 R] /Count 2", pdfContent);
+        Assert.Contains("(PDF Audit Report) Tj", pdfContent);
+        Assert.Contains("(All systems operational.) Tj", pdfContent);
+        Assert.Contains("(Page 1 of 2) Tj", pdfContent);
+        Assert.Contains("(Page 2 of 2) Tj", pdfContent);
+        Assert.Contains("\nxref\n", pdfContent);
+        Assert.EndsWith("%%EOF\n", pdfContent);
+    }
 }

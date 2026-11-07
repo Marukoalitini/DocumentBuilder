@@ -128,10 +128,23 @@ Console.ForegroundColor = ConsoleColor.Green;
 Console.WriteLine($"✓ HTML exported to: {htmlPath}");
 Console.ResetColor();
 
+Console.WriteLine("\n[4] Switching strategy at runtime to PdfDocumentExporter (Strategy #3)...");
+
+var pdfExporter = new PdfDocumentExporter();
+pdfExporter.Attach(progressObserver);
+
+exportContext.SetStrategy(pdfExporter);
+string pdfPath = Path.Combine(outputDirectory, "cloud_infrastructure_audit.pdf");
+exportContext.ExportToFile(document, pdfPath);
+
+Console.ForegroundColor = ConsoleColor.Green;
+Console.WriteLine($"✓ PDF exported to: {pdfPath}");
+Console.ResetColor();
+
 // ---------------------------------------------------------------------------
 // PART 3: Client Extensibility (Open/Closed Principle - Custom Exporter)
 // ---------------------------------------------------------------------------
-Console.WriteLine("\n[4] Switching strategy to custom client PlainTextDocumentExporter (OCP Extension)...");
+Console.WriteLine("\n[5] Switching strategy to custom client PlainTextDocumentExporter (OCP Extension)...");
 
 var customTxtExporter = new PlainTextDocumentExporter();
 customTxtExporter.Attach(progressObserver);
