@@ -90,4 +90,26 @@ public class BuilderTests
         Assert.Equal(10, orderedList.StartNumber);
         Assert.Equal(2, orderedList.Items.Count);
     }
+
+    [Fact]
+    public void DocumentBuilder_AddQuestPdfInspiredElements_BuildsAllRichElements()
+    {
+        // Act
+        Document doc = new DocBuilder("Rich Document")
+            .AddCodeBlock("SELECT * FROM audit_logs;", "sql")
+            .AddBlockquote("Security is a process, not a product.", "Bruce Schneier")
+            .AddHyperlink("Portal", "https://portal.example.com", "Main Portal")
+            .AddColumns(new Paragraph("Col 1"), new Paragraph("Col 2"))
+            .AddPageBreak()
+            .Build();
+
+        // Assert
+        Assert.Equal(5, doc.Elements.Count);
+        Assert.IsType<CodeBlock>(doc.Elements[0]);
+        Assert.IsType<Blockquote>(doc.Elements[1]);
+        Assert.IsType<Hyperlink>(doc.Elements[2]);
+        var columnLayout = Assert.IsType<ColumnLayout>(doc.Elements[3]);
+        Assert.Equal(2, columnLayout.Elements.Count);
+        Assert.IsType<PageBreak>(doc.Elements[4]);
+    }
 }

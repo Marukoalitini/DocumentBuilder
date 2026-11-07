@@ -47,12 +47,29 @@ Document document = new DocBuilder("Global Cloud Infrastructure & Systems Audit"
             .AddParagraph("Average persistent volume latency was measured at 0.72 milliseconds, " +
                           "with zero unrecoverable volume degradation events recorded.")
             .AddItalicParagraph("Note: IOPS measurements were collected under peak load conditions.")
+            .AddBlockquote(
+                "Infrastructure resilience has reached its highest historical benchmark since multi-region active-active failover was deployed.",
+                citation: "Principal Site Reliability Architect")
+        )
+        .AddSubSection("Regional Distribution & Diagnostic Script", sub => sub
+            .AddColumns(
+                new Paragraph("North America East (us-east-1): 80 active nodes operating at 99.992% uptime."),
+                new Paragraph("Europe West (eu-west-1): 52 active nodes operating at 99.981% uptime.")
+            )
+            .AddCodeBlock(
+                "kubectl get nodes --selector=node-role.kubernetes.io/worker -o wide\n" +
+                "kubectl top nodes --sort-by=cpu",
+                language: "bash")
         )
     )
+    .AddPageBreak()
     .AddSection("Compliance and Security Posture", section => section
         .AddBorderedParagraph(
             "All cluster worker nodes have received the latest security kernel patches with zero unresolved critical CVEs.",
             label: "Security Clearance")
+        .AddElement(new Paragraph("Critical compliance attestation passed across all regulated financial and healthcare workloads.")
+            .WithHighlight("#fef08a")
+            .WithAlignment(TextAlignment.Center))
         .AddParagraph("Key audit highlights:")
         .AddBulletList([
             "Automated vulnerability scanning enabled on all CI/CD pipelines.",
@@ -66,6 +83,10 @@ Document document = new DocBuilder("Global Cloud Infrastructure & Systems Audit"
             "Enable HTTP/3 protocol negotiation on primary ingress controllers.",
             "Execute annual disaster recovery simulation by mid-November 2026."
         ])
+        .AddHyperlink(
+            "View Full SOC2 Type II & ISO 27001 Compliance Dashboard",
+            "https://compliance.internal.example.com/audits/2026-q3",
+            tooltip: "Internal Compliance Portal")
     )
     // Injecting a custom element defined in the client project (Open/Closed Principle)
     .AddElement(new CalloutBox("Notice", "Next recurring quarterly audit is scheduled for December 15, 2026.").WithBorder("Schedule"))

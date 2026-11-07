@@ -212,6 +212,65 @@ public sealed class DocumentBuilder
     }
 
     /// <summary>
+    /// Adds a formatted source code block to the root document.
+    /// </summary>
+    /// <param name="code">The source code content.</param>
+    /// <param name="language">Optional language identifier (e.g., "csharp", "json", "bash").</param>
+    /// <returns>The current builder instance for chaining.</returns>
+    public DocumentBuilder AddCodeBlock(string code, string? language = null)
+    {
+        _document.Add(new CodeBlock(code, language));
+        return this;
+    }
+
+    /// <summary>
+    /// Adds a quotation block with an optional citation to the root document.
+    /// </summary>
+    /// <param name="text">The quote text.</param>
+    /// <param name="citation">Optional author or source attribution.</param>
+    /// <returns>The current builder instance for chaining.</returns>
+    public DocumentBuilder AddBlockquote(string text, string? citation = null)
+    {
+        _document.Add(new Blockquote(text, citation));
+        return this;
+    }
+
+    /// <summary>
+    /// Adds a hyperlink element to the root document.
+    /// </summary>
+    /// <param name="text">The display text for the link.</param>
+    /// <param name="url">The destination URL.</param>
+    /// <param name="tooltip">Optional tooltip text.</param>
+    /// <returns>The current builder instance for chaining.</returns>
+    public DocumentBuilder AddHyperlink(string text, string url, string? tooltip = null)
+    {
+        _document.Add(new Hyperlink(text, url, tooltip));
+        return this;
+    }
+
+    /// <summary>
+    /// Adds an explicit page break instruction to the root document.
+    /// </summary>
+    /// <returns>The current builder instance for chaining.</returns>
+    public DocumentBuilder AddPageBreak()
+    {
+        _document.Add(new PageBreak());
+        return this;
+    }
+
+    /// <summary>
+    /// Adds a multi-column side-by-side layout container to the root document.
+    /// </summary>
+    /// <param name="columns">The child elements representing each column.</param>
+    /// <returns>The current builder instance for chaining.</returns>
+    public DocumentBuilder AddColumns(params IDocumentElement[] columns)
+    {
+        ArgumentNullException.ThrowIfNull(columns);
+        _document.Add(new ColumnLayout(columns));
+        return this;
+    }
+
+    /// <summary>
     /// Adds an arbitrary document element to the root document (supporting extensibility).
     /// </summary>
     /// <param name="element">The document element to add.</param>

@@ -37,6 +37,11 @@ public sealed class HtmlDocumentExporter : DocumentExporterTemplate
         sb.AppendLine("    figcaption { font-size: 0.875rem; color: #6b7280; margin-top: 0.5rem; }");
         sb.AppendLine("    .bordered-box { border: 2px solid #4b5563; padding: 1rem; margin: 1rem 0; border-radius: 0.375rem; background: #fafafa; }");
         sb.AppendLine("    .bordered-label { font-weight: 700; text-transform: uppercase; font-size: 0.85rem; color: #374151; margin-bottom: 0.4rem; }");
+        sb.AppendLine("    pre { background: #1e293b; color: #f8fafc; padding: 1rem; border-radius: 0.375rem; overflow-x: auto; font-family: ui-monospace, monospace; font-size: 0.9rem; }");
+        sb.AppendLine("    blockquote { border-left: 4px solid #6b7280; margin: 1.25rem 0; padding: 0.5rem 1rem; background: #f9fafb; font-style: italic; }");
+        sb.AppendLine("    .columns { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.25rem; margin: 1.25rem 0; }");
+        sb.AppendLine("    .column { border: 1px solid #e5e7eb; padding: 0.85rem; border-radius: 0.375rem; }");
+        sb.AppendLine("    .page-break { page-break-after: always; border-top: 2px dashed #d1d5db; margin: 2rem 0; }");
         sb.AppendLine("    hr { border: 0; border-top: 1px solid #e5e7eb; margin: 1.5rem 0; }");
         sb.AppendLine("  </style>");
         sb.AppendLine("</head>");
@@ -160,6 +165,61 @@ public sealed class HtmlDocumentExporter : DocumentExporterTemplate
     }
 
     /// <inheritdoc />
+    protected override string FormatCodeBlock(CodeBlock codeBlock, int currentHeadingLevel)
+    {
+        string langAttr = string.IsNullOrWhiteSpace(codeBlock.Language)
+            ? string.Empty
+            : $" class=\"language-{WebUtility.HtmlEncode(codeBlock.Language)}\"";
+        return $"  <pre><code{langAttr}>{WebUtility.HtmlEncode(codeBlock.Code.TrimEnd())}</code></pre>";
+    }
+
+    /// <inheritdoc />
+    protected override string FormatBlockquote(Blockquote blockquote, int currentHeadingLevel)
+    {
+        var sb = new StringBuilder();
+        sb.AppendLine("  <blockquote>");
+        sb.AppendLine($"    <p>{WebUtility.HtmlEncode(blockquote.Text)}</p>");
+        if (!string.IsNullOrWhiteSpace(blockquote.Citation))
+        {
+            sb.AppendLine($"    <footer>— <cite>{WebUtility.HtmlEncode(blockquote.Citation)}</cite></footer>");
+        }
+        sb.Append("  </blockquote>");
+        return sb.ToString();
+    }
+
+    /// <inheritdoc />
+    protected override string FormatHyperlink(Hyperlink hyperlink, int currentHeadingLevel)
+    {
+        string url = WebUtility.HtmlEncode(hyperlink.Url);
+        string text = WebUtility.HtmlEncode(hyperlink.Text);
+        string titleAttr = string.IsNullOrWhiteSpace(hyperlink.Tooltip)
+            ? string.Empty
+            : $" title=\"{WebUtility.HtmlEncode(hyperlink.Tooltip)}\"";
+        return $"  <p><a href=\"{url}\"{titleAttr}>{text}</a></p>";
+    }
+
+    /// <inheritdoc />
+    protected override string FormatPageBreak(PageBreak pageBreak, int currentHeadingLevel)
+    {
+        return "  <div class=\"page-break\"></div>";
+    }
+
+    /// <inheritdoc />
+    protected override string FormatColumnLayout(ColumnLayout columnLayout, int currentHeadingLevel)
+    {
+        var sb = new StringBuilder();
+        sb.AppendLine("  <div class=\"columns\">");
+        foreach (IDocumentElement col in columnLayout.Elements)
+        {
+            sb.AppendLine("    <div class=\"column\">");
+            sb.AppendLine($"      {FormatElement(col, currentHeadingLevel).Trim()}");
+            sb.AppendLine("    </div>");
+        }
+        sb.Append("  </div>");
+        return sb.ToString();
+    }
+
+    /// <inheritdoc />
     protected override string FormatBold(BoldDecorator bold, string innerContent, int currentHeadingLevel)
     {
         if (innerContent.StartsWith("<p>", StringComparison.Ordinal) && innerContent.EndsWith("</p>", StringComparison.Ordinal))
@@ -177,6 +237,44 @@ public sealed class HtmlDocumentExporter : DocumentExporterTemplate
             return $"  <p><em>{innerContent[3..^4]}</em></p>";
         }
         return $"  <em>{innerContent}</em>";
+    }
+
+    /// <inheritdoc />
+    protected override string FormatUnderline(UnderlineDecorator underline, string innerContent, int currentHeadingLevel)
+    {
+        if (innerContent.StartsWith("<p>", StringComparison.Ordinal) && innerContent.EndsWith("</p>", StringComparison.Ordinal))
+        {
+            return $"  <p><u>{innerContent[3..^4]}</u></p>";
+        }
+        return $"  <u>{innerContent}</u>";
+    }
+
+    /// <inheritdoc />
+    protected override string FormatStrikethrough(StrikethroughDecorator strikethrough, string innerContent, int currentHeadingLevel)
+    {
+        if (innerContent.StartsWith("<p>", StringComparison.Ordinal) && innerContent.EndsWith("</p>", StringComparison.Ordinal))
+        {
+            return $"  <p><del>{innerContent[3..^4]}</del></p>";
+        }
+        return $"  <del>{innerContent}</del>";
+    }
+
+    /// <inheritdoc />
+    protected override string FormatHighlight(HighlightDecorator highlight, string innerContent, int currentHeadingLevel)
+    {
+        string color = WebUtility.HtmlEncode(highlight.Color);
+        if (innerContent.StartsWith("<p>", StringComparison.Ordinal) && innerContent.EndsWith("</p>", StringComparison.Ordinal))
+        {
+            return $"  <p><mark style=\"background-color: {color};\">{innerContent[3..^4]}</mark></p>";
+        }
+        return $"  <mark style=\"background-color: {color};\">{innerContent}</mark>";
+    }
+
+    /// <inheritdoc />
+    protected override string FormatAlignment(AlignmentDecorator alignment, string innerContent, int currentHeadingLevel)
+    {
+        string align = alignment.Alignment.ToString().ToLowerInvariant();
+        return $"  <div style=\"text-align: {align};\">{innerContent}</div>";
     }
 
     /// <inheritdoc />

@@ -177,6 +177,65 @@ public sealed class SectionBuilder
     }
 
     /// <summary>
+    /// Adds a formatted source code block to the section.
+    /// </summary>
+    /// <param name="code">The source code content.</param>
+    /// <param name="language">Optional language identifier (e.g., "csharp", "json", "bash").</param>
+    /// <returns>The current section builder for chaining.</returns>
+    public SectionBuilder AddCodeBlock(string code, string? language = null)
+    {
+        _section.Add(new CodeBlock(code, language));
+        return this;
+    }
+
+    /// <summary>
+    /// Adds a quotation block with an optional citation to the section.
+    /// </summary>
+    /// <param name="text">The quote text.</param>
+    /// <param name="citation">Optional author or source attribution.</param>
+    /// <returns>The current section builder for chaining.</returns>
+    public SectionBuilder AddBlockquote(string text, string? citation = null)
+    {
+        _section.Add(new Blockquote(text, citation));
+        return this;
+    }
+
+    /// <summary>
+    /// Adds a hyperlink element to the section.
+    /// </summary>
+    /// <param name="text">The display text for the link.</param>
+    /// <param name="url">The destination URL.</param>
+    /// <param name="tooltip">Optional tooltip text.</param>
+    /// <returns>The current section builder for chaining.</returns>
+    public SectionBuilder AddHyperlink(string text, string url, string? tooltip = null)
+    {
+        _section.Add(new Hyperlink(text, url, tooltip));
+        return this;
+    }
+
+    /// <summary>
+    /// Adds an explicit page break instruction to the section.
+    /// </summary>
+    /// <returns>The current section builder for chaining.</returns>
+    public SectionBuilder AddPageBreak()
+    {
+        _section.Add(new PageBreak());
+        return this;
+    }
+
+    /// <summary>
+    /// Adds a multi-column side-by-side layout container to the section.
+    /// </summary>
+    /// <param name="columns">The child elements representing each column.</param>
+    /// <returns>The current section builder for chaining.</returns>
+    public SectionBuilder AddColumns(params IDocumentElement[] columns)
+    {
+        ArgumentNullException.ThrowIfNull(columns);
+        _section.Add(new ColumnLayout(columns));
+        return this;
+    }
+
+    /// <summary>
     /// Adds an arbitrary document element to the section (supporting extensibility).
     /// </summary>
     /// <param name="element">The document element to add.</param>

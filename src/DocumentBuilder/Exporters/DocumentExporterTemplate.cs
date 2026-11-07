@@ -150,9 +150,18 @@ public abstract class DocumentExporterTemplate : IDocumentExporter
             BulletList bulletList => FormatBulletList(bulletList, currentHeadingLevel),
             OrderedList orderedList => FormatOrderedList(orderedList, currentHeadingLevel),
             HorizontalSeparator separator => FormatHorizontalSeparator(separator, currentHeadingLevel),
+            CodeBlock codeBlock => FormatCodeBlock(codeBlock, currentHeadingLevel),
+            Blockquote blockquote => FormatBlockquote(blockquote, currentHeadingLevel),
+            Hyperlink hyperlink => FormatHyperlink(hyperlink, currentHeadingLevel),
+            PageBreak pageBreak => FormatPageBreak(pageBreak, currentHeadingLevel),
+            ColumnLayout columnLayout => FormatColumnLayout(columnLayout, currentHeadingLevel),
             Section section => FormatSection(section, currentHeadingLevel),
             BoldDecorator bold => FormatBold(bold, FormatElement(bold.InnerElement, currentHeadingLevel).Trim(), currentHeadingLevel),
             ItalicDecorator italic => FormatItalic(italic, FormatElement(italic.InnerElement, currentHeadingLevel).Trim(), currentHeadingLevel),
+            UnderlineDecorator underline => FormatUnderline(underline, FormatElement(underline.InnerElement, currentHeadingLevel).Trim(), currentHeadingLevel),
+            StrikethroughDecorator strikethrough => FormatStrikethrough(strikethrough, FormatElement(strikethrough.InnerElement, currentHeadingLevel).Trim(), currentHeadingLevel),
+            HighlightDecorator highlight => FormatHighlight(highlight, FormatElement(highlight.InnerElement, currentHeadingLevel).Trim(), currentHeadingLevel),
+            AlignmentDecorator alignment => FormatAlignment(alignment, FormatElement(alignment.InnerElement, currentHeadingLevel).Trim(), currentHeadingLevel),
             BorderDecorator border => FormatBorder(border, FormatElement(border.InnerElement, currentHeadingLevel).Trim(), currentHeadingLevel),
             DocumentElementDecorator customDecorator => FormatCustomDecorator(customDecorator, FormatElement(customDecorator.InnerElement, currentHeadingLevel).Trim(), currentHeadingLevel),
             _ => FormatCustomElement(element, currentHeadingLevel)
@@ -209,6 +218,55 @@ public abstract class DocumentExporterTemplate : IDocumentExporter
     protected abstract string FormatHorizontalSeparator(HorizontalSeparator separator, int currentHeadingLevel);
 
     /// <summary>
+    /// Formats a <see cref="CodeBlock"/> leaf element.
+    /// </summary>
+    protected virtual string FormatCodeBlock(CodeBlock codeBlock, int currentHeadingLevel)
+    {
+        return codeBlock.Render(Math.Max(0, currentHeadingLevel - 2));
+    }
+
+    /// <summary>
+    /// Formats a <see cref="Blockquote"/> leaf element.
+    /// </summary>
+    protected virtual string FormatBlockquote(Blockquote blockquote, int currentHeadingLevel)
+    {
+        return blockquote.Render(Math.Max(0, currentHeadingLevel - 2));
+    }
+
+    /// <summary>
+    /// Formats a <see cref="Hyperlink"/> leaf element.
+    /// </summary>
+    protected virtual string FormatHyperlink(Hyperlink hyperlink, int currentHeadingLevel)
+    {
+        return hyperlink.Render(Math.Max(0, currentHeadingLevel - 2));
+    }
+
+    /// <summary>
+    /// Formats a <see cref="PageBreak"/> leaf element.
+    /// </summary>
+    protected virtual string FormatPageBreak(PageBreak pageBreak, int currentHeadingLevel)
+    {
+        return pageBreak.Render(Math.Max(0, currentHeadingLevel - 2));
+    }
+
+    /// <summary>
+    /// Formats a <see cref="ColumnLayout"/> composite container and recursively formats its columns.
+    /// </summary>
+    protected virtual string FormatColumnLayout(ColumnLayout columnLayout, int currentHeadingLevel)
+    {
+        var sb = new StringBuilder();
+        for (int i = 0; i < columnLayout.Elements.Count; i++)
+        {
+            sb.AppendLine(FormatElement(columnLayout.Elements[i], currentHeadingLevel).TrimEnd());
+            if (i < columnLayout.Elements.Count - 1)
+            {
+                sb.AppendLine();
+            }
+        }
+        return sb.ToString().TrimEnd();
+    }
+
+    /// <summary>
     /// Formats a <see cref="Section"/> composite container and recursively formats its children.
     /// </summary>
     protected virtual string FormatSection(Section section, int currentHeadingLevel)
@@ -245,6 +303,38 @@ public abstract class DocumentExporterTemplate : IDocumentExporter
     protected virtual string FormatItalic(ItalicDecorator italic, string innerContent, int currentHeadingLevel)
     {
         return $"*{innerContent}*";
+    }
+
+    /// <summary>
+    /// Formats an <see cref="UnderlineDecorator"/> wrapping an inner element.
+    /// </summary>
+    protected virtual string FormatUnderline(UnderlineDecorator underline, string innerContent, int currentHeadingLevel)
+    {
+        return underline.FormatDecoratedContent(innerContent, Math.Max(0, currentHeadingLevel - 2));
+    }
+
+    /// <summary>
+    /// Formats a <see cref="StrikethroughDecorator"/> wrapping an inner element.
+    /// </summary>
+    protected virtual string FormatStrikethrough(StrikethroughDecorator strikethrough, string innerContent, int currentHeadingLevel)
+    {
+        return strikethrough.FormatDecoratedContent(innerContent, Math.Max(0, currentHeadingLevel - 2));
+    }
+
+    /// <summary>
+    /// Formats a <see cref="HighlightDecorator"/> wrapping an inner element.
+    /// </summary>
+    protected virtual string FormatHighlight(HighlightDecorator highlight, string innerContent, int currentHeadingLevel)
+    {
+        return highlight.FormatDecoratedContent(innerContent, Math.Max(0, currentHeadingLevel - 2));
+    }
+
+    /// <summary>
+    /// Formats an <see cref="AlignmentDecorator"/> wrapping an inner element.
+    /// </summary>
+    protected virtual string FormatAlignment(AlignmentDecorator alignment, string innerContent, int currentHeadingLevel)
+    {
+        return alignment.FormatDecoratedContent(innerContent, Math.Max(0, currentHeadingLevel - 2));
     }
 
     /// <summary>

@@ -140,6 +140,54 @@ public sealed class MarkdownDocumentExporter : DocumentExporterTemplate
     }
 
     /// <inheritdoc />
+    protected override string FormatCodeBlock(CodeBlock codeBlock, int currentHeadingLevel)
+    {
+        var sb = new StringBuilder();
+        string lang = codeBlock.Language ?? string.Empty;
+        sb.AppendLine($"```{lang}");
+        sb.AppendLine(codeBlock.Code.TrimEnd());
+        sb.Append("```");
+        return sb.ToString();
+    }
+
+    /// <inheritdoc />
+    protected override string FormatBlockquote(Blockquote blockquote, int currentHeadingLevel)
+    {
+        var sb = new StringBuilder();
+        foreach (string line in blockquote.Text.Split('\n'))
+        {
+            sb.AppendLine($"> {line.TrimEnd('\r')}");
+        }
+
+        if (!string.IsNullOrWhiteSpace(blockquote.Citation))
+        {
+            sb.AppendLine($"> — *{blockquote.Citation}*");
+        }
+
+        return sb.ToString().TrimEnd();
+    }
+
+    /// <inheritdoc />
+    protected override string FormatHyperlink(Hyperlink hyperlink, int currentHeadingLevel)
+    {
+        string tooltip = string.IsNullOrWhiteSpace(hyperlink.Tooltip) ? string.Empty : $" \"{hyperlink.Tooltip}\"";
+        return $"[{hyperlink.Text}]({hyperlink.Url}{tooltip})";
+    }
+
+    /// <inheritdoc />
+    protected override string FormatPageBreak(PageBreak pageBreak, int currentHeadingLevel)
+    {
+        return $"<div style=\"page-break-after: always;\"></div>{Environment.NewLine}{Environment.NewLine}---";
+    }
+
+    /// <inheritdoc />
+    protected override string FormatAlignment(AlignmentDecorator alignment, string innerContent, int currentHeadingLevel)
+    {
+        string alignAttr = alignment.Alignment.ToString().ToLowerInvariant();
+        return $"<div align=\"{alignAttr}\">{Environment.NewLine}{innerContent}{Environment.NewLine}</div>";
+    }
+
+    /// <inheritdoc />
     protected override string FormatBorder(BorderDecorator border, string innerContent, int currentHeadingLevel)
     {
         var sb = new StringBuilder();

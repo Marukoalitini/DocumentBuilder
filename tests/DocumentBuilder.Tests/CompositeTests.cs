@@ -214,4 +214,77 @@ public class CompositeTests
         docContainer.Clear();
         Assert.Empty(docContainer.Elements);
     }
+
+    [Fact]
+    public void CodeBlock_ShouldRenderCodeAndLanguageHeader()
+    {
+        // Arrange
+        var codeBlock = new CodeBlock("Console.WriteLine(\"Hello\");", "csharp");
+
+        // Act
+        string rendered = codeBlock.Render();
+
+        // Assert
+        Assert.Equal("csharp", codeBlock.Language);
+        Assert.Contains("[Code: csharp]", rendered);
+        Assert.Contains("Console.WriteLine(\"Hello\");", rendered);
+    }
+
+    [Fact]
+    public void Blockquote_ShouldRenderQuoteAndOptionalCitation()
+    {
+        // Arrange
+        var quote = new Blockquote("Simplicity is prerequisite for reliability.", "Edsger W. Dijkstra");
+
+        // Act
+        string rendered = quote.Render();
+
+        // Assert
+        Assert.Contains("\"Simplicity is prerequisite for reliability.\"", rendered);
+        Assert.Contains("— Edsger W. Dijkstra", rendered);
+    }
+
+    [Fact]
+    public void Hyperlink_ShouldRenderTextUrlAndStoreTooltip()
+    {
+        // Arrange
+        var link = new Hyperlink("Documentation", "https://docs.example.com", "Official Docs");
+
+        // Act
+        string rendered = link.Render();
+
+        // Assert
+        Assert.Equal("Official Docs", link.Tooltip);
+        Assert.Contains("Documentation (https://docs.example.com)", rendered);
+    }
+
+    [Fact]
+    public void PageBreak_ShouldRenderPageBreakMarker()
+    {
+        // Arrange
+        var pageBreak = new PageBreak();
+
+        // Act
+        string rendered = pageBreak.Render(1);
+
+        // Assert
+        Assert.Contains("PAGE BREAK", rendered);
+    }
+
+    [Fact]
+    public void ColumnLayout_CompositeContainer_ShouldStoreAndRenderColumns()
+    {
+        // Arrange
+        var columns = new ColumnLayout(new Paragraph("Left Column"), new Paragraph("Right Column"));
+
+        // Act
+        string rendered = columns.Render();
+
+        // Assert
+        Assert.Equal(2, columns.Elements.Count);
+        Assert.Contains("[Column 1/2]", rendered);
+        Assert.Contains("Left Column", rendered);
+        Assert.Contains("[Column 2/2]", rendered);
+        Assert.Contains("Right Column", rendered);
+    }
 }

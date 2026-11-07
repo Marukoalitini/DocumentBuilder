@@ -104,4 +104,20 @@ public class DecoratorTests
         // Assert
         Assert.Contains("==<p><strong>Highlighted text</strong></p>==", htmlOutput);
     }
+
+    [Fact]
+    public void RichTextDecorators_UnderlineStrikethroughHighlightAlignment_ShouldFormatCorrectly()
+    {
+        // Arrange
+        IDocumentElement underlined = new Paragraph("Underlined text").AsUnderlined();
+        IDocumentElement strike = new Paragraph("Deprecated text").AsStrikethrough();
+        IDocumentElement highlighted = new Paragraph("Marked text").WithHighlight("#ffeb3b");
+        IDocumentElement centered = new Paragraph("Centered text").WithAlignment(TextAlignment.Center);
+
+        // Act & Assert
+        Assert.Equal("<u>Underlined text</u>", underlined.Render());
+        Assert.Equal("~~Deprecated text~~", strike.Render());
+        Assert.Equal("==Marked text==", highlighted.Render());
+        Assert.Equal("[CENTER] Centered text", centered.Render());
+    }
 }
