@@ -14,8 +14,7 @@ O artefato é uma biblioteca de classes, distribuída como DLL ou pacote NuGet. 
 
 ## Vídeo de apresentação
 
-<!-- Depois do upload, troque o texto da linha abaixo pelo link do vídeo no YouTube. -->
-**YouTube:** _link a adicionar depois da gravação_
+**YouTube:** https://youtu.be/4vHOut8WPvQ
 
 ## Índice
 
