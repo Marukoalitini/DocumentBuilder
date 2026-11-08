@@ -8,7 +8,7 @@ namespace DocumentBuilder.Exporters;
 /// Concrete export strategy that generates GitHub Flavored Markdown (.md) documents.
 /// Inherits the export lifecycle skeleton from <see cref="DocumentExporterTemplate"/>.
 /// </summary>
-public sealed class MarkdownDocumentExporter : DocumentExporterTemplate
+public class MarkdownDocumentExporter : DocumentExporterTemplate
 {
     /// <inheritdoc />
     public override string FileExtension => ".md";
@@ -202,5 +202,38 @@ public sealed class MarkdownDocumentExporter : DocumentExporterTemplate
         }
 
         return sb.ToString().TrimEnd();
+    }
+
+    // Markdown treats four leading spaces as a code block, so the steps below never indent
+    // their output, regardless of how deep the element sits in the section tree.
+
+    /// <inheritdoc />
+    protected override string FormatUnderline(UnderlineDecorator underline, string innerContent, int currentHeadingLevel)
+    {
+        return underline.FormatDecoratedContent(innerContent);
+    }
+
+    /// <inheritdoc />
+    protected override string FormatStrikethrough(StrikethroughDecorator strikethrough, string innerContent, int currentHeadingLevel)
+    {
+        return strikethrough.FormatDecoratedContent(innerContent);
+    }
+
+    /// <inheritdoc />
+    protected override string FormatHighlight(HighlightDecorator highlight, string innerContent, int currentHeadingLevel)
+    {
+        return highlight.FormatDecoratedContent(innerContent);
+    }
+
+    /// <inheritdoc />
+    protected override string FormatCustomDecorator(DocumentElementDecorator decorator, string innerContent, int currentHeadingLevel)
+    {
+        return decorator.FormatDecoratedContent(innerContent);
+    }
+
+    /// <inheritdoc />
+    protected override string FormatCustomElement(IDocumentElement element, int currentHeadingLevel)
+    {
+        return element.Render();
     }
 }

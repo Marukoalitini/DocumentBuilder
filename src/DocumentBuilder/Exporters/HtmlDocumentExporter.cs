@@ -9,7 +9,7 @@ namespace DocumentBuilder.Exporters;
 /// Concrete export strategy that generates standalone, styled HTML5 (.html) documents.
 /// Inherits the export lifecycle skeleton from <see cref="DocumentExporterTemplate"/>.
 /// </summary>
-public sealed class HtmlDocumentExporter : DocumentExporterTemplate
+public class HtmlDocumentExporter : DocumentExporterTemplate
 {
     /// <inheritdoc />
     public override string FileExtension => ".html";

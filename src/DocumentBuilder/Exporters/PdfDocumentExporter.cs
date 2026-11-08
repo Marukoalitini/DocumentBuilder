@@ -11,7 +11,7 @@ namespace DocumentBuilder.Exporters;
 /// Participates in both the Strategy (<see cref="IDocumentExporter"/>) and
 /// Template Method (<see cref="DocumentExporterTemplate"/>) patterns.
 /// </summary>
-public sealed class PdfDocumentExporter : DocumentExporterTemplate
+public class PdfDocumentExporter : DocumentExporterTemplate
 {
     private const double PageWidth = 595.0;   // A4 width in points
     private const double PageHeight = 842.0;  // A4 height in points
@@ -226,6 +226,23 @@ public sealed class PdfDocumentExporter : DocumentExporterTemplate
         return renderer.BuildPdfDocument();
     }
 
+    /// <inheritdoc />
+    protected override string FormatCustomDecorator(DocumentElementDecorator decorator, string innerContent, int currentHeadingLevel)
+    {
+        string decorated = SanitizeInline(decorator.FormatDecoratedContent(ExtractPlainTextFromDirective(innerContent)).Trim());
+
+        if (innerContent.StartsWith("@@PARAGRAPH|", StringComparison.Ordinal))
+        {
+            string[] parts = innerContent.Split('|', 6);
+            if (parts.Length == 6)
+            {
+                return $"@@PARAGRAPH|{parts[1]}|{parts[2]}|{parts[3]}|{parts[4]}|{decorated}";
+            }
+        }
+
+        return $"@@PARAGRAPH|F1|10.5|LEFT|NONE|{decorated}";
+    }
+
     private static string ApplyParagraphStyle(
         string directive,
         string? font = null,
@@ -244,6 +261,12 @@ public sealed class PdfDocumentExporter : DocumentExporterTemplate
                 string text = parts[5];
                 return $"@@PARAGRAPH|{currentFont}|{currentSize}|{currentAlign}|{currentDecoration}|{text}";
             }
+        }
+
+        // Headings, lists, tables and sections keep their own layout: inline styles only apply to paragraphs.
+        if (directive.StartsWith("@@", StringComparison.Ordinal) && !directive.StartsWith("@@BOX|", StringComparison.Ordinal))
+        {
+            return directive;
         }
 
         string plain = ExtractPlainTextFromDirective(directive);
@@ -270,7 +293,64 @@ public sealed class PdfDocumentExporter : DocumentExporterTemplate
             }
         }
 
+        if (directive.StartsWith("@@", StringComparison.Ordinal))
+        {
+            IEnumerable<string> lines = directive
+                .Split('\n')
+                .Select(line => ExtractPlainTextFromLine(line.Trim()))
+                .Where(text => text.Length > 0);
+
+            return string.Join(" / ", lines);
+        }
+
         return SanitizeInline(directive);
+    }
+
+    private static string ExtractPlainTextFromLine(string line)
+    {
+        if (!line.StartsWith("@@", StringComparison.Ordinal))
+        {
+            return line;
+        }
+
+        int separator = line.IndexOf('|');
+        string name = separator < 0 ? line : line[..separator];
+        string body = separator < 0 ? string.Empty : line[(separator + 1)..];
+
+        switch (name)
+        {
+            case "@@HEADING":
+                return body.Split('|', 2)[^1];
+            case "@@PARAGRAPH":
+                return body.Split('|', 5)[^1];
+            case "@@LIST_ITEM":
+                return string.Join(' ', body.Split('|', 2));
+            case "@@TABLE_START":
+            case "@@TABLE_ROW":
+            case "@@COLUMNS":
+                return body.Replace("\t", " | ");
+            case "@@CODE_LINE":
+                return body;
+            case "@@IMAGE":
+                return body.Split('|', 2)[^1];
+            case "@@BLOCKQUOTE":
+            {
+                string[] parts = body.Split('|', 2);
+                return parts.Length == 2 && parts[1].Length > 0 ? $"{parts[0]} - {parts[1]}" : parts[0];
+            }
+            case "@@LINK":
+            {
+                string[] parts = body.Split('|', 2);
+                return parts.Length == 2 ? $"{parts[0]} ({parts[1]})" : parts[0];
+            }
+            case "@@BOX":
+            {
+                string[] parts = body.Split('|', 2);
+                return parts.Length == 2 ? $"[{parts[0]}] {parts[1]}" : body;
+            }
+            default:
+                return string.Empty;
+        }
     }
 
     private static string SanitizeInline(string input)

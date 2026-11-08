@@ -396,7 +396,7 @@ public abstract class DocumentExporterTemplate : IDocumentExporter
 
     private void NotifyExportStarted(Document document, int totalElements)
     {
-        foreach (IExportObserver observer in _observers)
+        foreach (IExportObserver observer in _observers.ToArray())
         {
             observer.OnExportStarted(document, FileExtension);
         }
@@ -406,7 +406,7 @@ public abstract class DocumentExporterTemplate : IDocumentExporter
 
     private void NotifyElementExported(Document document, IDocumentElement element, int currentIndex, int totalElements)
     {
-        foreach (IExportObserver observer in _observers)
+        foreach (IExportObserver observer in _observers.ToArray())
         {
             observer.OnElementExported(document, element, currentIndex, totalElements);
         }
@@ -416,7 +416,7 @@ public abstract class DocumentExporterTemplate : IDocumentExporter
 
     private void NotifyExportCompleted(Document document, int totalElements, string finalOutput)
     {
-        foreach (IExportObserver observer in _observers)
+        foreach (IExportObserver observer in _observers.ToArray())
         {
             observer.OnExportCompleted(document, finalOutput);
         }

@@ -7,6 +7,36 @@ namespace DocumentBuilder.Tests;
 
 public class StrategyAndTemplateTests
 {
+    private sealed class BadgeElement(string text) : IDocumentElement
+    {
+        public string Text { get; } = text;
+
+        public string Render(int indentationLevel = 0) => $"[{Text}]";
+    }
+
+    private sealed class BadgeHtmlExporter : HtmlDocumentExporter
+    {
+        protected override string FormatCustomElement(IDocumentElement element, int currentHeadingLevel)
+        {
+            return element is BadgeElement badge
+                ? $"<span class=\"badge\">{badge.Text}</span>"
+                : base.FormatCustomElement(element, currentHeadingLevel);
+        }
+    }
+
+    [Fact]
+    public void BuiltInExporter_CanBeInherited_ToFormatCustomElementsNatively()
+    {
+        // Arrange
+        Document doc = new DocBuilder("Badge").AddElement(new BadgeElement("New")).Build();
+
+        // Act
+        string html = new BadgeHtmlExporter().Export(doc);
+
+        // Assert
+        Assert.Contains("<span class=\"badge\">New</span>", html);
+    }
+
     [Fact]
     public void HtmlDocumentExporter_Export_ProducesValidStyledHtml5()
     {

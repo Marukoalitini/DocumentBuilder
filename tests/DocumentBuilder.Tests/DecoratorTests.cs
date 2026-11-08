@@ -120,4 +120,60 @@ public class DecoratorTests
         Assert.Equal("==Marked text==", highlighted.Render());
         Assert.Equal("[CENTER] Centered text", centered.Render());
     }
+
+    [Fact]
+    public void PdfExporter_CustomDecorator_ShouldNotLeakInternalDirectives()
+    {
+        // Arrange
+        Document doc = new DocBuilder("Custom Decorator PDF")
+            .AddElement(new CustomHighlightDecorator(new Paragraph("Custom text").AsBold()))
+            .Build();
+
+        // Act
+        string pdf = new PdfDocumentExporter().Export(doc);
+
+        // Assert
+        Assert.Contains("(==Custom text==) Tj", pdf);
+        Assert.DoesNotContain("@@", pdf);
+    }
+
+    [Fact]
+    public void PdfExporter_DecoratorsOverNonParagraphBlocks_ShouldNotLeakInternalDirectives()
+    {
+        // Arrange
+        Document doc = new DocBuilder("Blocks PDF")
+            .AddElement(new Title("Decorated heading", 2).AsBold())
+            .AddElement(new BulletList(["First", "Second"]).WithBorder("List"))
+            .AddElement(new Table(["Name"]).AddRow("Value").WithBorder("Table"))
+            .AddElement(new Section("Decorated section").Add(new Paragraph("Body")).AsItalic())
+            .Build();
+
+        // Act
+        string pdf = new PdfDocumentExporter().Export(doc);
+
+        // Assert
+        Assert.Contains("(Decorated heading) Tj", pdf);
+        Assert.Contains("(Decorated section) Tj", pdf);
+        Assert.Contains("Second", pdf);
+        Assert.DoesNotContain("@@", pdf);
+    }
+
+    [Fact]
+    public void MarkdownExporter_DecoratorsInsideNestedSections_ShouldNotBeIndented()
+    {
+        // Arrange
+        Document doc = new DocBuilder("Nested")
+            .AddSection("Level 2", section => section
+                .AddSubSection("Level 3", sub => sub
+                    .AddElement(new Paragraph("deep").AsStrikethrough())
+                    .AddElement(new CustomHighlightDecorator(new Paragraph("custom")))))
+            .Build();
+
+        // Act
+        string markdown = new MarkdownDocumentExporter().Export(doc).Replace("\r\n", "\n");
+
+        // Assert
+        Assert.Contains("\n~~deep~~\n", markdown);
+        Assert.Contains("\n==custom==", markdown);
+    }
 }

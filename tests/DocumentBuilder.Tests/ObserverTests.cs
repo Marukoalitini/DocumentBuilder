@@ -101,4 +101,32 @@ public class ObserverTests
         Assert.Equal(("ElementProcessed", 100.0), stages[2]);
         Assert.Equal(("Completed", 100.0), stages[3]);
     }
+
+    private sealed class SelfDetachingObserver(DocumentExporterTemplate exporter) : IExportObserver
+    {
+        public void OnExportStarted(Document document, string fileExtension) => exporter.Detach(this);
+
+        public void OnElementExported(Document document, IDocumentElement element, int currentIndex, int totalCount)
+        {
+        }
+
+        public void OnExportCompleted(Document document, string exportedContent)
+        {
+        }
+    }
+
+    [Fact]
+    public void Observer_DetachingItselfDuringNotification_ShouldNotBreakExport()
+    {
+        // Arrange
+        Document doc = new DocBuilder("Detach").AddParagraph("Body").Build();
+        var exporter = new MarkdownDocumentExporter();
+        exporter.Attach(new SelfDetachingObserver(exporter));
+
+        // Act
+        string output = exporter.Export(doc);
+
+        // Assert
+        Assert.Contains("# Detach", output);
+    }
 }
